@@ -8,7 +8,7 @@ for efficient HTTP connection reuse.
 import hashlib
 import hmac
 import time
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlencode
 
 import requests
@@ -49,18 +49,25 @@ class BinanceFuturesClient:
             }
         )
 
-    def _sign_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        """Attach timestamp and HMAC-SHA256 signature to parameters."""
-        signed_params = dict(params)
-        signed_params["timestamp"] = int(time.time() * 1000)
-        # Optional but recommended
-        signed_params.setdefault("recvWindow", 5000)
+    def _build_signed_body(self, params: Dict[str, Any]) -> str:
+        """
+        Build a signed x-www-form-urlencoded body string.
 
-        # Binance expects query string signed
-        query_string = urlencode(sorted(signed_params.items()))
-        signature = hmac.new(self.api_secret, query_string.encode("utf-8"), hashlib.sha256).hexdigest()
-        signed_params["signature"] = signature
-        return signed_params
+        Important: The HMAC signature must be computed from the *exact* query string
+        that is sent to Binance. Sending a dict can reorder/format parameters
+        differently from the string used to sign, causing -1022.
+        """
+        items: List[Tuple[str, Any]] = list(params.items())
+        items.append(("timestamp", int(time.time() * 1000)))
+        if "recvWindow" not in params:
+            items.append(("recvWindow", 5000))
+
+        query_string = urlencode(items, doseq=True)
+        signature = hmac.new(
+            self.api_secret, query_string.encode("utf-8"), hashlib.sha256
+        ).hexdigest()
+
+        return f"{query_string}&signature={signature}"
 
     def _handle_response(self, response: requests.Response) -> Dict[str, Any]:
         """Validate HTTP and API-level errors."""
@@ -93,8 +100,11 @@ class BinanceFuturesClient:
         :param signed: Whether the endpoint requires a signature.
         """
         url = f"{self.base_url}{path}"
-        final_params = self._sign_params(params) if signed else params
-        response = self.session.post(url, data=final_params, timeout=self.timeout)
+        if signed:
+            body = self._build_signed_body(params)
+            response = self.session.post(url, data=body, timeout=self.timeout)
+        else:
+            response = self.session.post(url, data=params, timeout=self.timeout)
         return self._handle_response(response)
 
     def new_order(

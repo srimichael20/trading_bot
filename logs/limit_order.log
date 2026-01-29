@@ -1,2 +1,7 @@
 # Log file for LIMIT orders. Entries are appended by the application.
 
+2026-01-29 12:27:59,556 - INFO - Placing order with payload: {'symbol': 'BTCUSDT', 'side': 'SELL', 'type': 'LIMIT', 'quantity': 0.001, 'price': 60000.0, 'timeInForce': 'GTC'}
+2026-01-29 12:30:11,433 - INFO - Placing order with payload: {'symbol': 'BTCUSDT', 'side': 'SELL', 'type': 'LIMIT', 'quantity': 0.001, 'price': 60000.0, 'timeInForce': 'GTC'}
+2026-01-29 12:41:40,970 - INFO - Placing order with payload: {'symbol': 'BTCUSDT', 'side': 'SELL', 'type': 'LIMIT', 'quantity': 0.001, 'price': 60000.0, 'timeInForce': 'GTC'}
+2026-01-29 12:41:44,072 - INFO - Placing order with payload: {'symbol': 'BTCUSDT', 'side': 'SELL', 'type': 'LIMIT', 'quantity': 0.001, 'price': 60000.0, 'timeInForce': 'GTC'}
+2026-01-29 12:43:26,911 - INFO - Placing order with payload: {'symbol': 'BTCUSDT', 'side': 'SELL', 'type': 'LIMIT', 'quantity': 0.001, 'price': 60000.0, 'timeInForce': 'GTC'}
